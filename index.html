@@ -1,66 +1,79 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ChatBot Page</title>
-<style>
-body {
-font-family: sans-serif;
-background: #f6f6f6;
-padding: 20px;
-direction: rtl;
-}
-#chat-box {
-width: 100%;
-max-width: 600px;
-height: 400px;
-overflow-y: auto;
-background: #fff;
-border: 1px solid #ccc;
-padding: 10px;
-margin-bottom: 10px;
-}
-.msg { margin: 8px 0; }
-.user { color: #0a7; font-weight: bold; }
-.bot { color: #06c; font-weight: bold; }
-#input-area {
-display: flex;
-gap: 10px;
-max-width: 600px;
-}
-input {
-flex: 1;
-padding: 10px;
-border-radius: 5px;
-border: 1px solid #aaa;
-}
-button {
-padding: 10px 20px;
-border: none;
-background: #0a7;
-color: white;
-border-radius: 5px;
-cursor: pointer;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatBot</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; direction: rtl; }
+    #chat-box {
+      width: 100%; max-width: 600px; height: 400px;
+      overflow-y: auto; background: #fff; border: 1px solid #ccc;
+      padding: 10px; margin-bottom: 10px;
+    }
+    .msg { margin: 8px 0; }
+    .user { color: #0a7; font-weight: bold; }
+    .bot { color: #06c; font-weight: bold; }
+    #input-area { display: flex; gap: 10px; max-width: 600px; }
+    input {
+      flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #aaa;
+    }
+    button {
+      padding: 10px 20px; border: none; background: #0a7;
+      color: white; border-radius: 5px; cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-<h2>چت با ربات</h2>
 
+  <h2>چت با ربات</h2>
 
-<div id="chat-box"></div>
+  <div id="chat-box"></div>
 
+  <div id="input-area">
+    <input id="msgInput" type="text" placeholder="پیامت را بنویس..." />
+    <button id="sendBtn">ارسال</button>
+  </div>
 
-<div id="input-area">
-<input id="msgInput" type="text" placeholder="پیامت را بنویس..." />
-<button onclick="sendMsg()">ارسال</button>
-</div>
+  <script>
+    const chatBox = document.getElementById("chat-box");
+    const input = document.getElementById("msgInput");
+    const sendBtn = document.getElementById("sendBtn");
 
+    function addMessage(sender, text) {
+      const div = document.createElement("div");
+      div.className = "msg";
+      div.innerHTML = `<span class="${sender}">${sender === 'user' ? 'شما' : 'ربات'}:</span> ${text}`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-<script>
-const chatBox = document.getElementById("chat-box");
-const input = document.getElementById("msgInput");
+    async function sendMsg() {
+      const text = input.value.trim();
+      if (!text) return;
 
+      addMessage('user', text);
+      input.value = '';
 
-function addMessage(sender, text) {
+      try {
+        const res = await fetch("https://n8n.hoorai.ir/webhook/ad372041-9f72-42d7-9eed-012eecebd78f/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+
+        const data = await res.json().catch(() => null);
+        addMessage('bot', data?.reply || "پاسخی دریافت نشد");
+      } catch (e) {
+        addMessage('bot', "خطا در اتصال به سرور");
+      }
+    }
+
+    sendBtn.onclick = sendMsg;
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMsg();
+    });
+  </script>
+
+</body>
+</html>
