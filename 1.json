@@ -1,0 +1,63 @@
+{
+  "name": "ChatBot Webhook",
+  "nodes": [
+    {
+      "id": "Webhook",
+      "name": "Receive Message",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [300, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatbot-web",
+        "responseMode": "onReceived",
+        "options": {
+          "responseContentType": "application/json"
+        }
+      }
+    },
+    {
+      "id": "ChatGPT",
+      "name": "ChatGPT",
+      "type": "n8n-nodes-base.chatgpt",
+      "typeVersion": 1,
+      "position": [600, 300],
+      "parameters": {
+        "mode": "chat",
+        "chatInput": "User said: {{$json[\"message\"]}}"
+      }
+    },
+    {
+      "id": "Response",
+      "name": "Send JSON Back",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "parameters": {
+        "responseData": {
+          "responseBody": "={ { \"reply\": $json[\"text\"] } }"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Receive Message": {
+      "main": [
+        [
+          {
+            "node": "ChatGPT"
+          }
+        ]
+      ]
+    },
+    "ChatGPT": {
+      "main": [
+        [
+          {
+            "node": "Send JSON Back"
+          }
+        ]
+      ]
+    }
+  }
+}
