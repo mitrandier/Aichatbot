@@ -1,6 +1,6 @@
 # Aichatbot
 
-🤖 AI Chatbot Integration via Webhook
+🤖 Failed AI Chatbot Integration via Webhook
 
 A basic implementation of an AI-powered chatbot connected to a website using **webhooks**. The chatbot workflow is created with **n8n** and communicates with the **ChatGPT API** to provide interactive responses on a web page.
 
